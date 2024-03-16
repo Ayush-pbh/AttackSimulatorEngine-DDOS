@@ -35,7 +35,10 @@ def stop_ddos():
 @app.route('/use/ddos/status/', methods=['GET'])
 def ddos_status():
     global d_flag
-    return jsonify(d_flag)  
+    n = 200
+    if not d_flag:
+        n=201
+    return jsonify(d_flag),n
 
 
 if __name__ == '__main__':
